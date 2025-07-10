@@ -13,6 +13,9 @@ public class Main {
             String country = prompt(scanner, "国名を入力してください（例：Japan）");
             printSection("国情報");
             System.out.println(CountryInfoFetcher.getCountryInfo(country));
+            printSection("詳細情報");
+            String countryCode = CountryCodeConverter.getCountryCode(country);
+            WorldBankApiNoJackson.worldBank(countryCode);
 
             // Wikipedia概要
             printSection("Wikipedia概要");
@@ -22,7 +25,11 @@ public class Main {
             String city = prompt(scanner, "都市名を入力してください（例：Tokyo）");
             String apiKeyWeather = System.getenv("OPENWEATHER_API_KEY");
             printSection("天気情報");
-            System.out.println(WeatherFetcher.getWeather(city, apiKeyWeather));
+            if (apiKeyWeather == null || apiKeyWeather.isBlank()) {
+                System.out.println("エラー: OPENWEATHER_API_KEY 環境変数が設定されていません。");
+            } else {
+                System.out.println(WeatherFetcher.getWeather(city, apiKeyWeather));
+            }
 
             // 通貨レート
             String from = prompt(scanner, "通貨コード（例：USD）");
@@ -38,6 +45,10 @@ public class Main {
                         .format(DateTimeFormatter.ofPattern("yyyy年MM月dd日"));
                 System.out.printf(" 通貨換算結果（%s 時点）\n\n%s\n", today, rateLine);
             }
+
+            // クイズ
+            printSection("地理クイズ");
+            TriviaQuiz.runQuiz();
         }
     }
 

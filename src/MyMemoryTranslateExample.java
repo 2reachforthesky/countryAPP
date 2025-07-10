@@ -1,34 +1,39 @@
 package src;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URLEncoder;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.json.JSONObject;
 
 public class MyMemoryTranslateExample {
 
-    public static void main(String[] args) {
-        String textToTranslate = "The United States of America (USA) is a large country located in North America. It is made up of 50 states and a federal district called Washington, D.C., which is the capital city. The USA is known for its diverse culture, economy, and geography. It has a population of over 330 million people, making it one of the most populous countries in the world.";
-        printTranslation(textToTranslate, "en", "ja");
-    }
-
     public static void printTranslation(String text, String sourceLang, String targetLang) {
         try {
             String translatedText = translate(text, sourceLang, targetLang);
-            System.out.println(": " + translatedText);
+            System.out.println(translatedText);
         } catch (Exception e) {
+            System.out.println("翻訳中にエラーが発生しました。");
             e.printStackTrace();
         }
     }
 
     public static String translate(String text, String sourceLang, String targetLang) throws Exception {
-        // URLエンコード
-        String encodedText = URLEncoder.encode(text, "UTF-8");
-        String urlStr = "https://api.mymemory.translated.net/get?q=" + encodedText + "&langpair=" + sourceLang + "|"
-                + targetLang;
+        // textをURLエンコード
+        String encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8);
+        // langpairの区切り文字 | を %7C にエンコード
+        String langpair = sourceLang + "|" + targetLang;
+        String encodedLangpair = URLEncoder.encode(langpair, StandardCharsets.UTF_8);
 
-        URL url = new URL(urlStr);
+        String urlStr = "https://api.mymemory.translated.net/get?q=" + encodedText + "&langpair=" + encodedLangpair;
+
+        // URIを作成（Java20非推奨警告回避）
+        URI uri = new URI(urlStr);
+        URL url = uri.toURL();
+
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("Accept", "application/json");
@@ -38,19 +43,17 @@ public class MyMemoryTranslateExample {
             throw new RuntimeException("HTTPエラーコード: " + responseCode);
         }
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-        StringBuilder response = new StringBuilder();
-        String line;
-        while ((line = in.readLine()) != null) {
-            response.append(line);
+        try (BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) {
+                response.append(line);
+            }
+
+            JSONObject jsonResponse = new JSONObject(response.toString());
+            JSONObject responseData = jsonResponse.getJSONObject("responseData");
+            return responseData.getString("translatedText");
         }
-        in.close();
-
-        // JSON解析
-        JSONObject jsonResponse = new JSONObject(response.toString());
-        JSONObject responseData = jsonResponse.getJSONObject("responseData");
-        String translatedText = responseData.getString("translatedText");
-
-        return translatedText;
     }
 }

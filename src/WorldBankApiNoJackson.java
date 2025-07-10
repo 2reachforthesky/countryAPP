@@ -3,7 +3,9 @@ package src;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -11,16 +13,14 @@ import java.util.regex.Pattern;
 
 public class WorldBankApiNoJackson {
     public static void main(String[] args) throws Exception {
-        // 例: コマンドライン引数から国コードを取得して渡す
         if (args.length > 0) {
             worldBank(args[0]);
         } else {
-            // 引数がない場合は標準入力で取得
-            Scanner scanner = new Scanner(System.in);
-            System.out.print("国コードを入力してください（例: jp, us, cn）: ");
-            String countryCode = scanner.nextLine().trim().toLowerCase();
-            scanner.close();
-            worldBank(countryCode);
+            try (Scanner scanner = new Scanner(System.in)) {
+                System.out.print("国コードを入力してください（例: jp, us, cn）: ");
+                String countryCode = scanner.nextLine().trim().toLowerCase();
+                worldBank(countryCode);
+            }
         }
     }
 
@@ -35,15 +35,20 @@ public class WorldBankApiNoJackson {
             String indicatorName = entry.getValue();
 
             System.out.println("指標名: " + indicatorName);
-            String urlStr = String.format("https://api.worldbank.org/v2/country/%s/indicator/%s?format=json&per_page=5",
+            String urlStr = String.format(
+                    "https://api.worldbank.org/v2/country/%s/indicator/%s?format=json&per_page=5",
                     countryCode, indicatorCode);
 
-            URL url = new URL(urlStr);
+            // URIを経由してURL作成（非推奨回避）
+            URI uri = new URI(urlStr);
+            URL url = uri.toURL();
+
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
             StringBuilder response = new StringBuilder();
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+            try (BufferedReader in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = in.readLine()) != null) {
                     response.append(line);
@@ -52,7 +57,6 @@ public class WorldBankApiNoJackson {
 
             String json = response.toString();
 
-            // 正規表現で "date": "2021", "value": 123456 形式を抽出
             Pattern pattern = Pattern
                     .compile("\"date\"\\s*:\\s*\"(\\d{4})\".*?\"value\"\\s*:\\s*(null|[\\d\\.E\\+\\-]+)");
             Matcher matcher = pattern.matcher(json);
@@ -65,12 +69,10 @@ public class WorldBankApiNoJackson {
                 System.out.printf("  年度: %s  値: %s\n", year, value);
                 count++;
             }
-
             System.out.println("---------------------------------------------------");
         }
     }
 
-    // 数値をカンマ区切りで整形
     private static String formatNumber(String numStr) {
         try {
             double num = Double.parseDouble(numStr);

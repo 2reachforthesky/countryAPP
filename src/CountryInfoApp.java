@@ -6,59 +6,30 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class CountryInfoApp {
     public static void main(String[] args) {
-        // ここで国名を直接指定してください（日本語）
-        // 例: "日本", "アメリカ合衆国", "ハンガリー"
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter country name in English (e.g., Germany): ");
+        String countryName = scanner.nextLine().trim();
+        scanner.close();
 
-        fetchWikipediaSummary();
+        fetchWikidataLanguageReligion(countryName);
     }
 
-    private static void fetchWikipediaSummary() {
-        try {
-            String countryName = "イギリス";
-            String encodedName = URLEncoder.encode(countryName, StandardCharsets.UTF_8);
-            String url = "https://ja.wikipedia.org/api/rest_v1/page/summary/" + encodedName;
-
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .GET()
-                    .header("User-Agent", "Java WikipediaCultureApp/1.0")
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() != 200) {
-                System.err.println("Wikipedia API エラー: HTTP " + response.statusCode());
-                return;
-            }
-
-            JSONObject json = new JSONObject(response.body());
-
-            String title = json.optString("title", "不明");
-            String extract = json.optString("extract", "概要が見つかりませんでした。");
-
-            System.out.println("\n=== " + title + " の文化に関する概要 ===");
-            System.out.println(extract);
-            fetchWikidataLanguageReligion(countryName);
-
-        } catch (Exception e) {
-            System.err.println("Wikipedia概要取得中にエラーが発生しました。");
-            e.printStackTrace();
-
+    public static void fetchWikidataLanguageReligion(String countryName) {
+        // 入力を1文字目だけ大文字、残り小文字に変換（例: germany → Germany）
+        if (countryName != null && !countryName.isEmpty()) {
+            countryName = countryName.substring(0, 1).toUpperCase() + countryName.substring(1).toLowerCase();
         }
-    }
-
-    private static void fetchWikidataLanguageReligion(String countryName) {
         try {
             String sparql = "SELECT ?languageLabel ?religionLabel WHERE {\n" +
                     "  ?country wdt:P31 wd:Q6256;  # 国\n" +
-                    "           rdfs:label \"" + countryName + "\"@ja.\n" +
+                    "           rdfs:label \"" + countryName + "\"@en.\n" +
                     "  OPTIONAL { ?country wdt:P37 ?language. }\n" +
                     "  OPTIONAL { ?country wdt:P140 ?religion. }\n" +
                     "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"ja\". }\n" +

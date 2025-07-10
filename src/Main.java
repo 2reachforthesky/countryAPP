@@ -13,6 +13,8 @@ public class Main {
             String country = prompt(scanner, "国名を入力してください（例：Japan）");
             printSection("国情報");
             System.out.println(CountryInfoFetcher.getCountryInfo(country));
+            printSection("言語と宗教");
+            CountryInfoApp.fetchWikidataLanguageReligion(country);
             printSection("詳細情報");
             String countryCode = CountryCodeConverter.getCountryCode(country);
             WorldBankApiNoJackson.worldBank(countryCode);

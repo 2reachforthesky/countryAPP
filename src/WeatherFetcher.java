@@ -55,18 +55,18 @@ public class WeatherFetcher {
         double windSpeed = wind.getDouble("speed");
 
         StringBuilder sb = new StringBuilder();
-        sb.append("🌤️ 天気: ").append(weatherMain).append("（").append(weatherDesc).append("）\n");
-        sb.append("🌡️ 気温: ").append(temp).append("℃（体感 ").append(feelsLike).append("℃）\n");
-        sb.append("💧 湿度: ").append(humidity).append("%\n");
-        sb.append("🔽 気圧: ").append(pressure).append(" hPa\n");
-        sb.append("👁️ 視程: ");
+        sb.append(" 天気: ").append(weatherMain).append("（").append(weatherDesc).append("）\n");
+        sb.append(" 気温: ").append(temp).append("℃（体感 ").append(feelsLike).append("℃）\n");
+        sb.append("湿度: ").append(humidity).append("%\n");
+        sb.append(" 気圧: ").append(pressure).append(" hPa\n");
+        sb.append(" 視程: ");
         if (visibility >= 0) {
             sb.append(String.format("%.1f km", visibility / 1000.0));
         } else {
             sb.append("情報なし");
         }
         sb.append("\n");
-        sb.append("🍃 風速: ").append(windSpeed).append(" m/s");
+        sb.append(" 風速: ").append(windSpeed).append(" m/s");
 
         return sb.toString();
     }

@@ -10,6 +10,16 @@ public class CountryCodeConverter {
         countryNameToCode.put("united states", "US");
         countryNameToCode.put("germany", "DE");
         countryNameToCode.put("france", "FR");
+        countryNameToCode.put("china", "CN");
+        countryNameToCode.put("united kingdom", "GB");
+        countryNameToCode.put("south korea", "KR");
+        countryNameToCode.put("canada", "CA");
+        countryNameToCode.put("australia", "AU");
+        countryNameToCode.put("brazil", "BR");
+        countryNameToCode.put("india", "IN");
+        countryNameToCode.put("russia", "RU");
+        countryNameToCode.put("italy", "IT");
+
         // 必要に応じて追加...
     }
 

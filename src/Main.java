@@ -43,9 +43,9 @@ public class Main {
                         // **** 以前の Main.java のコードでは、executeTriviaQuiz() が引数を取らないと定義されていたため、
                         // **** ここでエラーが出ていました。executeTriviaQuiz も scanner を受け取る必要があります。
                         break;
-                   case 5: // その他のゲームとツール (main2のメニューを呼び出す)
-                    Main2.startProgramSelectionMenu(scanner);
-                    System.out.println("\n--- メインメニューに戻りました ---");
+                    case 5: // その他のゲームとツール (main2のメニューを呼び出す)
+                        Main2.startProgramSelectionMenu(scanner);
+                        System.out.println("\n--- メインメニューに戻りました ---");
                         break;
                     case 0:
                         System.out.println("プログラムを終了します。");

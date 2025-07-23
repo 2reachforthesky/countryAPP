@@ -1,29 +1,38 @@
-package src;
+package src.main2;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URI; // URIをインポート
+import java.net.URI;
 import java.net.URL;
 import java.util.Random;
 import java.util.Scanner;
 
 import org.json.JSONObject;
 
+import src.MyMemoryTranslateExample;
+
 public class CatFactGame {
 
+    // mainメソッドは通常、スタンドアロン実行用。
+    // 今回はmain2から呼ばれるため、このmainメソッドは削除またはコメントアウトしても良い。
+    // ただし、単体テストなどで使う場合は残しておくと便利。
     public static void main(String[] args) {
-        // playCatFactGame() メソッドを呼び出すだけ
-        playCatFactGame();
+        // スタンドアロン実行の場合、ここでScannerを生成して渡す
+        try (Scanner mainScanner = new Scanner(System.in)) {
+            playCatFactGame(mainScanner);
+        }
     }
 
     /**
      * 猫クイズゲームを実行します。
      * ユーザーは猫の事実が本当か嘘かを判断し、スコアを獲得します。
      * 取得した事実はMyMemoryTranslateExampleを使用して日本語に翻訳されます。
+     * 
+     * @param scanner ユーザー入力のためのScannerオブジェクト
      */
-    public static void playCatFactGame() {
-        Scanner scanner = new Scanner(System.in);
+    public static void playCatFactGame(Scanner scanner) { // ★ここに Scanner scanner を追加 ★
+        // Scanner scanner = new Scanner(System.in); // ★この行を削除またはコメントアウト★
         int score = 0;
 
         System.out.println(" 猫クイズゲームへようこそ！正しいと思えば 't'、間違ってると思えば 'f' を入力してください。");
@@ -60,11 +69,11 @@ public class CatFactGame {
         }
 
         System.out.println(" ゲーム終了！あなたのスコアは " + score + " / 5 でした！");
-        scanner.close();
+        // scanner.close(); // ★この行を削除またはコメントアウト！★
+        // 呼び出し元でScannerを閉じさせるため、ここでは閉じない。
     }
 
     private static String getCatFact() throws Exception {
-        // URIを介してURLを構築することで、より安全かつ推奨される方法に
         URI uri = new URI("https://catfact.ninja/fact");
         URL url = uri.toURL();
 
@@ -84,7 +93,6 @@ public class CatFactGame {
     }
 
     private static String fakeFact(String fact) {
-        // 猫の事実をちょっとだけ変えて「うそ」にする
         if (fact.contains("sleep")) {
             return fact.replaceAll("sleep", "dance");
         } else if (fact.contains("fur")) {
@@ -92,6 +100,6 @@ public class CatFactGame {
         } else if (fact.contains("climb")) {
             return fact.replaceAll("climb", "swim");
         }
-        return fact + " (This is also about dogs.)"; // 英語のままにしておき、翻訳で日本語になるように
+        return fact + " (This is also about dogs.)";
     }
 }

@@ -1,4 +1,4 @@
-package src;
+package src.main2;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -7,6 +7,8 @@ import java.net.URL;
 import java.net.URI; // URIをインポート (MyMemoryTranslateExampleに合わせて追加)
 
 import org.json.JSONObject;
+
+import src.MyMemoryTranslateExample;
 
 public class AdviceFetcher {
 

@@ -1,19 +1,25 @@
-package src;
+package src.main3;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.InputMismatchException; // InputMismatchException を import
 import java.util.Scanner;
+import java.util.Collections; // Collections を import
+import java.util.List; // List を import
+import java.util.Arrays; // Arrays を import
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class AnimeTriviaExample {
+
+public class AnimeTriviaGame { // クラス名を AnimeTriviaExample から AnimeTriviaGame に変更
 
     // MyMemory翻訳APIを使った翻訳メソッド
-    public static String translate(String text, String sourceLang, String targetLang) throws Exception {
+    // このメソッドはprivate staticとしてクラス内にカプセル化
+    private static String translate(String text, String sourceLang, String targetLang) throws Exception {
         String encodedText = URLEncoder.encode(text, "UTF-8");
         String langpair = sourceLang + "|" + targetLang;
         String encodedLangpair = URLEncoder.encode(langpair, "UTF-8");
@@ -37,8 +43,14 @@ public class AnimeTriviaExample {
         return responseData.getString("translatedText");
     }
 
-    public static void main(String[] args) {
-        try (Scanner scanner = new Scanner(System.in)) {
+    /**
+     * アニメトリビアゲームを開始します。
+     * OpenTDB APIからアニメに関するクイズを取得し、日本語に翻訳してユーザーに提示します。
+     *
+     * @param scanner ユーザー入力のためのScannerオブジェクト
+     */
+    public static void playAnimeTriviaGame(Scanner scanner) { // 関数化し、Scannerを引数として受け取るように変更
+        try {
             String apiUrl = "https://opentdb.com/api.php?amount=1&category=31&type=multiple";
 
             HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
@@ -81,10 +93,11 @@ public class AnimeTriviaExample {
                 }
 
                 // 選択肢をシャッフル（正解がどこにあるかわからなくする）
-                java.util.List<String> choiceList = java.util.Arrays.asList(choices);
-                java.util.Collections.shuffle(choiceList);
+                List<String> choiceList = Arrays.asList(choices);
+                Collections.shuffle(choiceList);
 
                 // 表示
+                System.out.println("--- アニメトリビアゲーム ---");
                 System.out.println("問題:");
                 System.out.println(questionJa);
                 System.out.println();
@@ -96,7 +109,15 @@ public class AnimeTriviaExample {
                 // ユーザーに回答を入力してもらう
                 System.out.println();
                 System.out.print("回答番号を入力してください（例: 1） > ");
-                int answerIndex = scanner.nextInt() - 1;
+                int answerIndex = -1;
+                try {
+                    answerIndex = scanner.nextInt() - 1;
+                    scanner.nextLine(); // 改行文字を消費
+                } catch (InputMismatchException e) {
+                    System.out.println("無効な入力です。数字を入力してください。");
+                    scanner.nextLine(); // 不正な入力をクリア
+                    return; // ゲームを終了するか、再試行させるか選択
+                }
 
                 if (answerIndex >= 0 && answerIndex < totalChoices) {
                     String selectedAnswer = choiceList.get(answerIndex);
@@ -119,8 +140,15 @@ public class AnimeTriviaExample {
             }
 
         } catch (Exception e) {
-            System.out.println("エラーが発生しました。");
+            System.out.println("エラーが発生しました。クイズの取得または翻訳に失敗しました。");
             e.printStackTrace();
+        }
+    }
+
+    // テスト用のmainメソッド
+    public static void main(String[] args) {
+        try (Scanner scanner = new Scanner(System.in)) {
+            playAnimeTriviaGame(scanner);
         }
     }
 }

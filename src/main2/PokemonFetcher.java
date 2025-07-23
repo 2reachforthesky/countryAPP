@@ -1,41 +1,43 @@
+package src.main2;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Random;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class RandomPokemon {
+public class PokemonFetcher {
 
-    // ポケモンの最大ID（必要に応じて更新してください）
-    private static final int MAX_POKEMON_ID = 1010;
+    /**
+     * ランダムなポケモンのIDを取得し、その情報（英語名、日本語名、タイプ）を表示します。
+     * PokeAPIとGoogle翻訳API（非公式）を使用します。
+     */
+    public static void fetchAndDisplayRandomPokemon() {
+        // タイプ英日対応表（公式準拠）をメソッド内に移動
+        final Map<String, String> TYPE_JA_MAP = Map.ofEntries(
+                Map.entry("normal", "ノーマル"),
+                Map.entry("fire", "ほのお"),
+                Map.entry("water", "みず"),
+                Map.entry("electric", "でんき"),
+                Map.entry("grass", "くさ"),
+                Map.entry("ice", "こおり"),
+                Map.entry("fighting", "かくとう"),
+                Map.entry("poison", "どく"),
+                Map.entry("ground", "じめん"),
+                Map.entry("flying", "ひこう"),
+                Map.entry("psychic", "エスパー"),
+                Map.entry("bug", "むし"),
+                Map.entry("rock", "いわ"),
+                Map.entry("ghost", "ゴースト"),
+                Map.entry("dragon", "ドラゴン"),
+                Map.entry("dark", "あく"),
+                Map.entry("steel", "はがね"),
+                Map.entry("fairy", "フェアリー"));
 
-    // タイプ英日対応表（公式準拠）
-    private static final Map<String, String> TYPE_JA_MAP = Map.ofEntries(
-            Map.entry("normal", "ノーマル"),
-            Map.entry("fire", "ほのお"),
-            Map.entry("water", "みず"),
-            Map.entry("electric", "でんき"),
-            Map.entry("grass", "くさ"),
-            Map.entry("ice", "こおり"),
-            Map.entry("fighting", "かくとう"),
-            Map.entry("poison", "どく"),
-            Map.entry("ground", "じめん"),
-            Map.entry("flying", "ひこう"),
-            Map.entry("psychic", "エスパー"),
-            Map.entry("bug", "むし"),
-            Map.entry("rock", "いわ"),
-            Map.entry("ghost", "ゴースト"),
-            Map.entry("dragon", "ドラゴン"),
-            Map.entry("dark", "あく"),
-            Map.entry("steel", "はがね"),
-            Map.entry("fairy", "フェアリー"));
-
-    public static void main(String[] args) {
         int randomId = getRandomPokemonId();
         System.out.println("ランダムなポケモンID: " + randomId);
 
@@ -78,6 +80,7 @@ public class RandomPokemon {
                 } catch (Exception e) {
                     // 取得失敗時はnullのまま
                 }
+                // 公式日本語名が取得できなかった場合、Google翻訳APIで翻訳を試みる
                 if (nameJa == null) {
                     nameJa = translateToJapanese(name);
                 }
@@ -91,22 +94,27 @@ public class RandomPokemon {
                 for (int i = 0; i < types.length(); i++) {
                     JSONObject typeInfo = types.getJSONObject(i).getJSONObject("type");
                     String typeEn = typeInfo.getString("name");
+                    // 定義済みのマップから日本語名を取得、なければ翻訳を試みる
                     String typeJa = TYPE_JA_MAP.getOrDefault(typeEn, translateToJapanese(typeEn));
                     System.out.println("- " + typeEn + "（" + typeJa + "）");
                 }
                 System.out.println("==============================");
             } else {
                 System.out.println("エラー: HTTPステータス " + response.statusCode());
+                System.out.println("ポケモン情報の取得に失敗しました。ID: " + randomId);
             }
         } catch (Exception e) {
+            System.out.println("ポケモン情報の取得中に予期せぬエラーが発生しました: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     // 1からMAX_POKEMON_IDまでのランダムな整数を返す
     private static int getRandomPokemonId() {
+        // ポケモンの最大IDをメソッド内に移動
+        final int MAX_POKEMON_ID = 1010;
         Random random = new Random();
-        return random.nextInt(MAX_POKEMON_ID) + 1;
+        return random.nextInt(MAX_POKEMON_ID) + 1; // 0からMAX_POKEMON_ID-1なので+1
     }
 
     // Google翻訳API（非公式）で英語→日本語
@@ -121,8 +129,13 @@ public class RandomPokemon {
                     .GET()
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            org.json.JSONArray transArray = new org.json.JSONArray(response.body());
-            return transArray.getJSONArray(0).getJSONArray(0).getString(0);
+            // レスポンスが空の場合や不正なJSONの場合を考慮
+            if (response.body().startsWith("[[[")) { // Google翻訳APIの典型的なレスポンス形式
+                org.json.JSONArray transArray = new org.json.JSONArray(response.body());
+                return transArray.getJSONArray(0).getJSONArray(0).getString(0);
+            } else {
+                return "(翻訳データなし)";
+            }
         } catch (Exception e) {
             return "(翻訳失敗)";
         }

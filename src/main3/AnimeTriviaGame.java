@@ -3,8 +3,8 @@ package src.main3;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
+import java.net.URI;
 import java.util.InputMismatchException; // InputMismatchException を import
 import java.util.Scanner;
 import java.util.Collections; // Collections を import
@@ -13,7 +13,6 @@ import java.util.Arrays; // Arrays を import
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 
 public class AnimeTriviaGame { // クラス名を AnimeTriviaExample から AnimeTriviaGame に変更
 
@@ -26,7 +25,7 @@ public class AnimeTriviaGame { // クラス名を AnimeTriviaExample から Anim
 
         String apiUrl = "https://api.mymemory.translated.net/get?q=" + encodedText + "&langpair=" + encodedLangpair;
 
-        HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
+        HttpURLConnection conn = (HttpURLConnection) new URI(apiUrl).toURL().openConnection();
         conn.setRequestMethod("GET");
         conn.setRequestProperty("Accept", "application/json");
 
@@ -53,7 +52,7 @@ public class AnimeTriviaGame { // クラス名を AnimeTriviaExample から Anim
         try {
             String apiUrl = "https://opentdb.com/api.php?amount=1&category=31&type=multiple";
 
-            HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
+            HttpURLConnection conn = (HttpURLConnection) new URI(apiUrl).toURL().openConnection();
             conn.setRequestMethod("GET");
 
             BufferedReader reader = new BufferedReader(

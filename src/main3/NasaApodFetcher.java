@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -24,8 +25,8 @@ public class NasaApodFetcher {
             String langpair = "en|ja";
             String apiUrl = "https://api.mymemory.translated.net/get?q=" + encodedText + "&langpair=" + langpair;
 
-            // URLは URI 経由せず直接 HttpURLConnection に渡すことで安全に処理
-            URL url = new URL(apiUrl);
+            // URLは URI 経由で生成し、非推奨警告を回避
+            URL url = new URI(apiUrl).toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Accept", "application/json");
@@ -57,7 +58,7 @@ public class NasaApodFetcher {
             String apiKey = "BRgMJDpDn6cMLfcaDZAtyaTr5tXO1hA0zVsX6iI8"; // ご自身のAPIキーに置き換えてください
             String apiUrl = "https://api.nasa.gov/planetary/apod?api_key=" + apiKey;
 
-            HttpURLConnection conn = (HttpURLConnection) new URL(apiUrl).openConnection();
+            HttpURLConnection conn = (HttpURLConnection) new URI(apiUrl).toURL().openConnection();
             conn.setRequestMethod("GET");
 
             BufferedReader reader = new BufferedReader(

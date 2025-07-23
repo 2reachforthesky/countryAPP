@@ -1,4 +1,4 @@
-package src;
+package src.main;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*; // <-- java.util.Scanner がここに含まれる
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import src.MyMemoryTranslateExample;
 
 public class TriviaQuiz {
     // main メソッドは単体テスト用として残すか、削除しても良い

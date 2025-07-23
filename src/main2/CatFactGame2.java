@@ -1,17 +1,25 @@
+package src.main2;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.Scanner; // Scannerをここでimport
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class CatApiAndFact {
+public class CatFactGame2 {
     // TheCatAPIのAPIキー
     private static final String API_KEY = "live_GIpXv5KR9IIoLzy4V2lhtbzVYbGWYNv5NhLiXG7pHDfewg2cwZj7vI2Hx8SqMShu";
 
-    public static void main(String[] args) {
+    /**
+     * 猫の画像と雑学を取得して表示するゲームを開始します。
+     * ユーザー入力のためにScannerオブジェクトを使用します。
+     *
+     * @param scanner ユーザー入力のためのScannerオブジェクト
+     */
+    public static void playCatFactGame(Scanner scanner) {
         // 国名→猫種IDの対応表（一部例。必要に応じて追加可能）
         Map<String, String> countryToBreedId = Map.ofEntries(
                 Map.entry("日本", "jbt"), // Japanese Bobtail
@@ -27,7 +35,7 @@ public class CatApiAndFact {
                 Map.entry("スコットランド", "sfol"), // Scottish Fold
                 Map.entry("シンガポール", "sing") // Singapura
         );
-        Scanner scanner = new Scanner(System.in);
+
         System.out.print("国名を入力してください（例: 日本, アメリカ, ロシア...）: ");
         String country = scanner.nextLine().trim();
         String breedId = countryToBreedId.get(country);

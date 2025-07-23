@@ -6,6 +6,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import src.main.CountryCodeConverter;
+import src.main.CountryInfoApp;
+import src.main.CountryInfoFetcher;
+import src.main.CurrencyRateFetcher;
+import src.main.TriviaQuiz;
+import src.main.WeatherFetcher;
+import src.main.WikipediaFetcher;
+import src.main.WorldBankApiNoJackson;
+
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in); // MainクラスでScannerを初期化
@@ -35,7 +44,7 @@ public class Main {
                         // **** ここでエラーが出ていました。executeTriviaQuiz も scanner を受け取る必要があります。
                         break;
                    case 5: // その他のゲームとツール (main2のメニューを呼び出す)
-                    main2.startProgramSelectionMenu(scanner);
+                    Main2.startProgramSelectionMenu(scanner);
                     System.out.println("\n--- メインメニューに戻りました ---");
                         break;
                     case 0:

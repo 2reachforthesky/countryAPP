@@ -1,0 +1,338 @@
+Cチーム　関数マニュアル
+
+--- WebAPI: 国の言語と宗教 ---
+【URL】
+ https://query.wikidata.org/sparql?query=" +　URLEncoder.encode(sparql, StandardCharsets.UTF_8) + "&format=json
+
+【説明】
+ 指定された国名（英語、例：Germany）に基づいて、その国の公用語（言語）と主な宗教を取得する。
+ 情報はWikidataから取得され、結果はJSON形式で提供される。
+
+【取得できる情報】
+ languageLabel.value: 国の言語（例：ドイツ語）、religionLabel.value: 国の主な宗教（例：キリスト教）
+
+【備考】
+ 国名は英語で入力（最初の1文字は大文字、他は小文字）。
+ 結果がない場合は「見つかりませんでした」と表示される。
+ ヘッダーに User-Agent を設定する必要がある。
+
+--- WebAPI: 国情報 ---
+
+【URL】 
+     　https://restcountries.com/v3.1/name/{国名}
+※ 例：https://restcountries.com/v3.1/name/japan
+
+【説明】
+指定した国名に一致する国の詳細な情報を取得できるAPI。国名は英語で入力する。複数一致した場合は、最初の1件のみを使用する。
+結果はJSON形式で返される。
+
+【取得できる情報】
+name.common: 国の一般的な名称（例：Japan）
+name.official: 国の正式名称（例：Japan）
+capital[0]: 首都（例：Tokyo）
+region: 地域（例：Asia）
+subregion: 地域内分類（例：Eastern Asia）
+population: 人口（例：125,000,000）
+currencies: 通貨情報（名前と記号）
+
+【備考】
+通貨は複数ある可能性があるが、最初の1件のみを表示している。
+結果が配列で返されるため、最初の要素（最も一致度の高い国）を抽出して使用している。
+国名にスペースが含まれていてもURIエンコードは不要。
+
+--- WebAPI: 通貨換算 ---
+
+【URL】
+       https://api.apilayer.com/exchangerates_data/convert?from={通貨1}&to={通貨2}&amount=1
+※ 例：https://api.apilayer.com/exchangerates_data/convert?from=USD&to=JPY&amount=1
+
+【説明】
+指定された2つの通貨（例：USD → JPY）の換算レートを取得する。
+金額は常に「1」として指定され、結果として「1通貨 = ○○通貨」の形式で換算レートが返される。
+
+【取得できる情報】
+result: 換算レート（例：1 USD = 110.1234 JPY）
+date: 換算レートが有効な日付（例：2025-07-15）
+
+【備考】
+HTTPヘッダーに apikey を指定する必要がある
+換算できない場合やAPIエラー時は result が存在しない（エラーメッセージ表示）
+日付は「yyyy年MM月dd日」形式に整形して表示される
+API呼び出しが失敗した場合は、HTTPステータスコードに基づくエラーを表示
+
+--- WebAPI: 英単語の意味取得 ---
+
+【URL】
+　　　 https://api.dictionaryapi.dev/api/v2/entries/en/{単語}
+※ 例：https://api.dictionaryapi.dev/api/v2/entries/en/hello
+
+【説明】
+ 指定した英単語の意味や定義、発音などを取得できる無料の辞書API。
+ このプログラムでは、入力された英単語の最初の意味のみを取得して表示する。
+
+【取得できる情報】
+ word: 検索された単語（例：hello）
+ meanings[0].definitions[0].definition: 単語の定義（例：A greeting or expression of goodwill.）
+
+【備考】
+ 結果はJSON配列として返され、最初の要素（定義）を使用する
+ エラー（例：単語が存在しない、接続できないなど）が発生した場合は、例外として処理される
+ 定義取得後、他のクラス（例：MyMemoryTranslateExample）で翻訳処理が呼び出される仕組みになっている（翻訳APIとの連
+ 携）
+
+--- WebAPI: ランダムアドバイス取得 ---
+【URL】
+ https://api.adviceslip.com/advice
+
+【説明】
+ このAPIは、ランダムな英語のアドバイスを1件返してくれるシンプルなWebAPI。
+ 取得されたアドバイス文は、MyMemoryTranslateExample クラスを用いて日本語に翻訳され、最終的にコンソールに表示され        　
+ る。
+
+【取得できる情報】
+ slip.advice: 英語でのアドバイス文（例：Always trust your gut feeling.）
+
+【備考】
+ 結果はJSON形式で返される（例：{"slip":{"advice":"～"}}）
+ 翻訳処理には別途 MyMemoryTranslateExample クラスが必要（MyMemory翻訳APIなどと連携）
+ APIキー不要・登録不要で誰でも利用可能
+ 通信ステータスコードが 200 OK でない場合はエラーメッセージを表示
+
+--- WebAPI: アニメ・トリビアクイズ ---
+
+【URL】
+ https://opentdb.com/api.php?amount=1&category=31&type=multiple
+
+【説明】
+ Open Trivia Database から「アニメ・マンガ」カテゴリのクイズ（多肢選択式）を1問取得するAPI。
+ amount=1: 取得するクイズ数（1問）
+ category=31: アニメ・マンガカテゴリ（31）
+ type=multiple: 選択肢形式（4択）
+
+【取得できる情報】
+ results: クイズデータの配列
+ question: 問題文（HTMLエスケープされた英語）
+ correct_answer: 正解の選択肢（英語）
+ incorrect_answers: 不正解の選択肢リスト（英語）
+
+--- WebAPI: 翻訳（MyMemory Translation API） ---
+
+【URL】
+ https://api.mymemory.translated.net/get?q=テキスト&langpair=言語1|言語2
+
+【説明】
+ 指定した文（q）を、langpair の形式で指定した言語（例: en|ja）に翻訳する。無料で簡単に翻訳できる。
+ 例: q=hello&langpair=en|ja → 「こんにちは」
+
+【取得できる情報】
+ responseData: レスポンス本体
+ translatedText: 翻訳後のテキスト
+
+--- WebAPI: 猫の事実API（Cat Fact API） ---
+
+【URL】
+ https://catfact.ninja/fact
+
+【説明】
+ 猫に関するランダムな「事実（ファクト）」を1件取得できるAPI。
+ クイズの題材となる文がここから取得される。
+
+【JSONキー】
+ fact: 猫に関する事実（英文） 
+ length: その事実の文字数（使用していないが含まれる）
+
+--- WebAPI: NASAの天体写真 API（APOD: Astronomy Picture of the Day） ---
+
+【URL】
+ https://api.nasa.gov/planetary/apod?api_key=あなたのAPIキー
+
+【説明】
+ NASAが提供する「今日の天体画像（Astronomy Picture of the Day）」を取得するAPI。
+ 宇宙に関連する写真とその説明文（英語）が日替わりで提供される。APIキーの取得は無料。
+
+【取得できる情報】
+ title: 画像のタイトル
+ url: 画像のURL
+ explanation: 英語での解説文された文
+
+
+--- WebAPI: Wikipedia REST API（日本語版） ---
+
+【URL例】
+ https://ja.wikipedia.org/api/rest_v1/page/summary/東京
+（※"東京" は検索タイトル。必要に応じてURLエンコードされる）
+
+【説明】
+ 指定したタイトルの日本語版Wikipediaページから要約（summary）情報を取得するAPI。
+ 取得対象は「概要（冒頭の説明）」のみ。
+ 機械可読なJSON形式で返される。
+
+【取得できる情報】
+ extract: ページの要約（冒頭の説明文）
+ title: 記事タイトル
+ description: 記事の簡単なカテゴリ（例: "都市", "プログラミング言語"）
+
+--- WebAPI: 世界銀行（World Bank Open Data API） ---
+
+【URL例】
+ https://api.worldbank.org/v2/country/jp/indicator/NY.GDP.MKTP.CD?format=json&per_page=5
+ ※国コードと指標コードで検索可能。上記は「日本のGDP（過去5年分）」を取得する例。
+
+【説明】
+ 世界各国の経済・人口・雇用などの統計データを提供するWorld BankのREST API。
+ 国コード（例：jp, us, cn）と、指標コード（例：NY.GDP.MKTP.CD）を組み合わせて使用。
+
+【リクエストパラメータ】
+ country: 国コード（ISO2形式）例：jp（日本）、us（アメリカ）など
+ indicator: 統計指標コード
+ format: jsonを指定（必須）
+ per_page: 返却件数（年数分）例：5年分のデータなら per_page=5
+
+--- WebAPI: 平均年齢予測 ---
+
+【URL】
+ https://api.agify.io?name=名前&country_id=JP
+
+【説明】 
+ 指定した名前（ローマ字）と国コード（JP=日本）をもとに、その名前の平均年齢を予測します。
+ 結果はJSON形式で返され、名前（name）、予測年齢（age）、データ件数（count）が含まれます。
+ 入力が空の場合は処理を終了し、API呼び出しでエラーがあれば例外を表示します。
+
+--- WebAPI: Numbers API トリビア取得 ---
+
+【URL】
+ http://numbersapi.com/数字 または http://numbersapi.com/月/日/date
+
+【説明】
+ 指定した数字や日付（月/日形式）にまつわるトリビア（雑学）を取得します。
+ 結果はプレーンテキストで取得でき、英語の文章が返されます。
+ 取得した英語のトリビアはGoogle翻訳の非公式APIを使って日本語に翻訳し、両方表示します。
+ API呼び出し失敗時はステータスコードを表示し、翻訳失敗時は「(翻訳失敗)」と返します。
+
+--- WebAPI: Open Trivia Database ジオグラフィー（易しい問題） ---
+
+【URL】
+ https://opentdb.com/api.php?amount=1&category=22&difficulty=easy
+
+【説明】
+ジャンル「22（地理）」で難易度「easy（易しい）」のクイズ問題を1問取得します。
+問題文・正解・不正解の選択肢はHTMLエスケープされているためデコードします。
+英語の問題文・選択肢はGoogle翻訳の非公式APIで日本語に翻訳して表示します。
+選択肢はシャッフルされ、ユーザーは番号入力で回答します。
+回答後、正誤判定を行い、正解を表示します。
+API呼び出し失敗時や翻訳失敗時にはエラーメッセージを表示します。
+
+--- WebAPI: PokeAPI ポケモン情報取得 ---
+
+【URL】
+ https://pokeapi.co/api/v2/pokemon/{id}
+
+【説明】
+ 指定したポケモンID（1～1010のランダムID）に対応するポケモンの基本情報を取得します。
+ 英語名、タイプ情報を取得し、タイプは公式の英日対応表で日本語化します。
+ ポケモン種族情報API（https://pokeapi.co/api/v2/pokemon-species/{id}）を利用し、公式の日本語名を取得。日本語名が取得できない場合は、Google翻訳APIの非公式エンドポイントで英語名を日本語に翻訳します。
+ タイプも日本語対応表にない場合はGoogle翻訳により日本語化を試みます。
+ HTTPステータスや例外発生時にはエラーメッセージを表示。
+
+--- WebAPI: History Muffin Labs 今日の歴史 ---
+
+【URL】
+ https://history.muffinlabs.com/date/{月}/{日}
+
+【説明】
+ 指定した月日（例: 7/15）に起きた歴史上の出来事を取得できます。
+ レスポンスはJSON形式で、"data" オブジェクト内の "Events" 配列に出来事の情報が入っています。
+ 1件あたり、"year"（出来事の年）と "text"（英語の説明）を取得可能。
+ 例として最大5件の出来事を取得・表示します。
+ 英語の説明文はGoogle翻訳APIの非公式エンドポイントで日本語訳されます。
+
+--- WebAPI: 都市の天気情報取得 ---
+
+【URL】
+ https://api.openweathermap.org/data/2.5/weather?q=" + URLEncoder.encode(city, StandardCharsets.UTF_8) + "&appid=" + apiKey + "&units=metric&lang=ja
+
+【説明】
+ 指定された都市名（日本語可）に基づいて、その都市の現在の天気情報を取得する。
+ 情報は OpenWeatherMap から取得され、結果は JSON形式 で提供される。
+ 天気の主な状態、気温、体感温度、湿度、気圧、視程、風速などが整形表示される。
+
+【取得できる情報】
+ weather.main: 天気の主状態（例：Clouds）
+ weather.description: 詳細な天気説明（例：曇りがち）
+ main.temp: 現在の気温（℃）
+ main.feels_like: 体感温度（℃）
+ main.humidity: 湿度（%）
+ main.pressure: 気圧（hPa）
+ visibility: 視程（m）
+ wind.speed: 風速（m/s）
+
+【備考】
+ 都市名は 日本語や英語に対応（例：Tokyo、東京）
+ lang=ja パラメータを指定することで、天気の説明を日本語で取得可能
+ 気温は摂氏（units=metric）で取得される
+ API呼び出しには OpenWeatherMap の APIキー が必要
+ エラーハンドリングやステータスコードチェックを追加すると、より堅牢になる
+
+--- WebAPI: 猫の画像検索 API（TheCatAPI）---
+
+【URL】
+ https://api.thecatapi.com/v1/images/search
+
+【説明】
+ ランダムな猫の画像を取得するためのAPIです。
+ オプションで猫種や画像の数などを指定することで、より目的に合った画像を取得できます。
+ 結果は JSON 配列で返され、各要素に猫画像の URL や猫種情報などが含まれます。
+
+【取得できる情報】
+ breed_ids:指定した猫種の画像だけを取得	
+ limit:取得する画像の枚数	
+ mime_types画像の種類
+ size:画像のサイズ	
+ format:レスポンス形式
+
+【備考】
+ 利用には APIキー（x-api-key ヘッダー） の設定が推奨されます（高頻度利用時は必須）。
+ 猫種（breed_ids）を指定しない場合は、完全にランダムな猫画像が返されます。
+ レスポンスは常に配列形式で、通常は1件のみ含まれます（limitで複数可）。
+
+--- WebAPI: 翻訳APIの呼び出し ---
+【URL】
+ https://translate.googleapis.com/translate_a/single
+
+【説明】
+ Google翻訳ウェブ版が内部的に利用している翻訳APIを直接呼び出すURLです。
+ 正式なGoogle Cloud Translation APIではなく、ドキュメント化されていない非公開のAPIです。
+ ちょっとしたテキスト翻訳に使えますが、仕様変更やアクセス制限のリスクがあります。
+ 
+【取得できる情報】
+ client:クライアント識別子
+ sl:翻訳元の言語コード
+ tl:翻訳先の言語コード
+ dt:翻訳結果の詳細指定
+ q:翻訳したいテキスト
+
+--- WebAPI: ポケモン詳細情報取得---
+【URL】
+ https://pokeapi.co/api/v2/pokemon-species/{id or name}/
+
+【説明】
+ 指定したポケモン種族（species）の詳細情報を取得するAPIです。
+ {id or name} にはポケモンのID番号（例: 1）または英語名（例: bulbasaur）を指定します。
+ ポケモン「種族」単位のデータが返ってきます。
+（同じ種族に複数のフォルムや形態がある場合、それらをまとめた親的な情報）
+
+【取得できる主な情報】
+ names：多言語対応のポケモン種族名（日本語名など含む）
+ flavor_text_entries：図鑑説明文（複数言語・複数バージョン対応）
+ habitat：生息地情報
+ color：種族の代表的な色
+ shape：体の形状
+ evolution_chain：進化チェーンへのリンク
+ is_legendary：伝説のポケモンかどうか（真偽値）
+ is_mythical：幻のポケモンかどうか（真偽値）
+ generation：登場した世代情報
+
+【備考】
+ ポケモンの個別フォルムではなく「種族」単位での情報取得に向いています。
+ 英語名やIDから日本語名や図鑑説明文などの多言語情報を取得したい場合によく使われます。
+ PokeAPIの中でも情報量が多いエンドポイントです。

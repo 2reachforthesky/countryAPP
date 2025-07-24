@@ -22,10 +22,10 @@ public class NasaApodFetcher {
             int end = Math.min(i + maxLength, text.length());
             String part = text.substring(i, end);
             String encodedText = URLEncoder.encode(part, StandardCharsets.UTF_8);
-            String langpair = "en|ja";
+            String langpair = URLEncoder.encode("en|ja", StandardCharsets.UTF_8);
             String apiUrl = "https://api.mymemory.translated.net/get?q=" + encodedText + "&langpair=" + langpair;
 
-            // URLは URI 経由で生成し、非推奨警告を回避
+            // new URI(apiUrl).toURL()で非推奨警告を回避
             URL url = new URI(apiUrl).toURL();
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
